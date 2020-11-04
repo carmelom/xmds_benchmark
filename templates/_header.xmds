@@ -19,7 +19,7 @@
     <bing/>
     <fftw plan="measure"/>
     {%if not conf.run_mpi %}
-    <openmp threads="{{ conf.omp_threds }}"/>
+    <openmp threads="{{ conf.omp_threads }}"/>
     {% endif %}
     <globals><![CDATA[
     const real N = 4e6;

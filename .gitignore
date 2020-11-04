@@ -3,6 +3,7 @@
 build/
 run/
 .doit*.db
+configure.yaml
 _config.yaml
 nohup.out
 
