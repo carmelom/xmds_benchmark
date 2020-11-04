@@ -1,0 +1,38 @@
+  <name>{{conf.exec_filename}}</name>
+
+  <author>CM</author>
+
+  <description>
+      Benchmark
+      Groundstate of 2D GPE in harmonic trap
+      {% if conf.run_mpi %}
+      run MPI with {{ conf.mpi_cores }} cores
+      {% else %}
+      run OpenMP with {{ conf.omp_threads }} threads
+      {% endif %}
+      repeat: {{ conf.repeat }}
+  </description>
+
+  <features>
+    <auto_vectorise/>
+    <benchmark/>
+    <bing/>
+    <fftw plan="measure"/>
+    {%if not conf.run_mpi %}
+    <openmp threads="{{ conf.omp_threds }}"/>
+    {% endif %}
+    <globals><![CDATA[
+    const real N = 4e6;
+    const real a_scatt = 0.0004150924143715271;
+	const real g = 4*M_PI*a_scatt;
+    {% if conf.globals %}
+    {% for key, value in conf.globals.items() %}
+    real {{key}} = {{value}};
+    {% endfor %}
+    {% endif %}
+	]]></globals>
+  </features>
+
+  {% if conf.run_mpi %}
+  <driver name="distributed-mpi" />
+  {% endif %}

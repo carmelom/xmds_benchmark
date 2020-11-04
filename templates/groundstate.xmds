@@ -1,0 +1,93 @@
+<simulation xmds-version="2">
+
+    {% include '_header.xmds' %}
+
+    {% include '_geometry.xmds' %}
+
+    <vector name="wavefunction" dimensions="x y" type="complex">
+        <components>psi</components>
+            <initialisation>
+                <![CDATA[
+                psi = 4000 * exp(-(x*x + y*y) / 20);
+                real theta = atan2(y - 4, x);
+                psi *= exp(i * theta);
+                ]]>
+            </initialisation>
+    </vector>
+
+    <computed_vector name="normalization" dimensions="" type="real">
+        <components>
+            Norm
+        </components>
+        <evaluation>
+            <dependencies>wavefunction</dependencies>
+            <![CDATA[Norm = mod2(psi);]]>
+        </evaluation>
+    </computed_vector>
+
+    <computed_vector name="kin_energy" dimensions="" type="real">
+        <components> ke </components>
+        <evaluation>
+            <dependencies basis="kx ky"> wavefunction </dependencies>
+            <![CDATA[ke = 0.5*(kx*kx + ky*ky)*mod2(psi);]]>
+        </evaluation>
+    </computed_vector>
+
+    <computed_vector name="pot_energy" dimensions="" type="real">
+        <components> ve </components>
+        <evaluation>
+            <dependencies basis="x y"> wavefunction potential </dependencies>
+            <![CDATA[ve = (V1 + 0.5*g*mod2(psi))*mod2(psi);]]>
+        </evaluation>
+    </computed_vector>
+
+    <sequence>
+        <!-- <integrate algorithm="ARK45" interval="{{conf.runtime}}" steps="{{ (((conf.runtime / conf.dt / 100) | round) * 100) | int }}" tolerance="1e-06"> -->
+        <integrate algorithm="ARK45" interval="{{conf.runtime}}" steps="{{ (conf.runtime / conf.dt ) | round | int }}" tolerance="1e-06">
+            <samples> 100 100 </samples>
+            <filters where="step end">
+                <filter>
+                    <dependencies>wavefunction normalization</dependencies>
+                    <![CDATA[psi *= sqrt(N/Norm);]]>
+                </filter>
+            </filters>
+            <operators>
+                <operator kind="ip" type="real">
+                    <operator_names>Tx</operator_names>
+                    <![CDATA[Tx = -0.5*kx*kx;]]>
+                </operator>
+                <operator kind="ip" type="real">
+                    <operator_names>Ty</operator_names>
+                    <![CDATA[Ty = -0.5*ky*ky;]]>
+                </operator>
+                <integration_vectors>wavefunction</integration_vectors>
+                <dependencies>potential</dependencies>
+                <![CDATA[
+		dpsi_dt = Tx[psi] + Ty[psi] - (V1 + g*mod2(psi))*psi;
+		]]>
+            </operators>
+        </integrate>
+        <breakpoint filename="{{conf.output_filename | replace(".h5", "")}}" format="hdf5">
+            <dependencies basis="x y">wavefunction</dependencies>
+        </breakpoint>
+    </sequence>
+
+    <!-- <output/> -->
+    <output filename="{{conf.output_filename | replace(".h5", "")}}_full">
+        <sampling_group basis="x y" initial_sample="no">
+            <moments>psiR psiI</moments>
+            <dependencies>wavefunction</dependencies>
+            <![CDATA[_SAMPLE_COMPLEX(psi);]]>
+        </sampling_group>
+
+        <sampling_group initial_sample="no">
+            <moments> energy </moments>
+            <dependencies> kin_energy pot_energy</dependencies>
+            <![CDATA[
+                energy = ke + ve;
+            ]]>
+        </sampling_group>
+
+    </output>
+
+</simulation>

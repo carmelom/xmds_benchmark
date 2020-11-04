@@ -1,0 +1,13 @@
+<geometry>
+  <propagation_dimension>t</propagation_dimension>
+  <transverse_dimensions>
+      <dimension name="x" domain="(-20, 20)" lattice="{{ conf.lattice }}" aliases="y"/>
+  </transverse_dimensions>
+</geometry>
+
+<vector name="potential" dimensions="x y" type="real">
+  <components>V1</components>
+  <initialisation>
+      <![CDATA[V1 = 0.5*x*x + 0.5*y*y;]]>
+  </initialisation>
+</vector>

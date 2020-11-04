@@ -1,0 +1,23 @@
+# template configuration
+
+build_dir:           build
+run_dir:             run
+h5filepath:          "{sequence_index:04d}/xmds_benchmark_{run_number:04d}.h5"
+
+groundstate:
+    output_filename: groundstate.h5
+    runtime:         1
+
+
+
+dt:                  1e-6
+sampling_dt:         0.05
+
+lattice:             1024
+repeat:              0
+
+run_mpi:             true  # false will run openmp instead
+mpi_cores:           4
+omp_threds:          8
+
+# globals:
